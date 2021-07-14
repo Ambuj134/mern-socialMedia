@@ -1,12 +1,22 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import "./rightbar.css";
 import { Users } from "../../data";
+import { Add, Remove } from "@material-ui/icons";
 import Online from "../online/Online";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import { AuthContext } from "../../context/AuthContext";
+
 const Rightbar = ({ user }) => {
   const PF = process.env.REACT_APP_PUBLIC_FOLDER;
   const [friends, setFriends] = useState([]);
+  const { user: currentUser, dispatch } = useContext(AuthContext);
+  const [followed, setFollowed] = useState(
+    currentUser.followings.includes(user?.id)
+  );
+  useEffect(() => {
+    setFollowed(currentUser.followings.includes(user?.id));
+  }, [currentUser]);
 
   useEffect(() => {
     const getFriends = async () => {
@@ -23,6 +33,26 @@ const Rightbar = ({ user }) => {
     };
     getFriends();
   }, [user]);
+  const handleFollow = async () => {
+    try {
+      if (followed) {
+        await axios.put(
+          "http://localhost:4000/api/users/" + user._id + "/unfollow",
+          { userId: currentUser._id }
+        );
+        dispatch({ type: "UNFOLLOW", payload: user._id });
+      } else {
+        await axios.put(
+          "http://localhost:4000/api/users/" + user._id + "/follow",
+          { userId: currentUser._id }
+        );
+        dispatch({ type: "FOLLOW", payload: user._id });
+      }
+    } catch (err) {
+      console.log(err);
+    }
+    setFollowed(!followed);
+  };
 
   const HomeRightbar = () => {
     return (
@@ -47,6 +77,12 @@ const Rightbar = ({ user }) => {
   const ProfileRightbar = () => {
     return (
       <>
+        {user.username !== currentUser.username && (
+          <button className="rightbarFollowButton" onClick={handleFollow}>
+            {followed ? "Unfollow" : "Follow"}
+            {followed ? <Remove /> : <Add />}
+          </button>
+        )}
         <h4 className="rightbarTitle">User Information</h4>
         <div className="rightbarInfo">
           <div className="rightbarInfoItem">

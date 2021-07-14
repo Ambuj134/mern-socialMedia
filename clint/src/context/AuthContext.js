@@ -4,7 +4,7 @@ import AuthReducer from "./AuthReducer";
 const initialState = {
   user: {
     _id: "60e3ecebe2dfb638b4e6e281",
-    profilePicture: "person/11.jpg",
+    profilePicture: "person/1.jpeg",
     coverPicture: "",
     followers: [],
     followings: [],
